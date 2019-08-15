@@ -53,6 +53,8 @@ class Worker(QThread):
         self.mainWindow.combox_serial.addItems(portlist)
 
     def sendCommand(self):
+        if self.curCmdName == '':
+            return
         args = self.cmdObjDict[self.curCmdName].getArgs()
         self.mainWindow.listLog.addItem(str(args))
         self.mainWindow.listLog.scrollToBottom()

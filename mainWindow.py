@@ -86,6 +86,7 @@ class MainWindow(QWidget):
         for i in range(self.model.columnCount() - 1):
             self.tree.hideColumn(i + 1)
         self.tree.setHeaderHidden(True)
+        self.tree.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         spilt_cmdwin.addWidget(self.tree)
 
         self.scrollCmd = QScrollArea()

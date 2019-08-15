@@ -10,7 +10,7 @@ class Command():
         return self.widget
 
     def getArgs(self):
-        return {'FD': self.widget.getArgWidget('FD').text(), 'Data': self.widget.getArgWidget('Data').text()}
+        return {'FD': self.widget.getArgWidget('FD').text(), 'Data': self.widget.getArgWidget('Data').toPlainText()}
 
     def parse(self, data):
         pass
