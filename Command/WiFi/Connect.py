@@ -1,20 +1,15 @@
-from PyQt5.QtWidgets import *
-
+from mxArgWidgets import *
 
 class Command():
 
-    def __init__(self):
-        self.widget = QWidget()
-        formlayout = QFormLayout(self.widget)
-        formlayout.setRowWrapPolicy(QFormLayout.WrapAllRows)
-        formlayout.addRow('SSID', QLineEdit())
-        formlayout.addRow('Passphrase', QLineEdit())
-        textBrowser = QTextBrowser()
-        textBrowser.setText('Connect to an Acess-Point')
-        formlayout.addRow('Description', textBrowser)
+    def getWidget(self):
+        self.widget = MxArgsWidget('Connect to an Acess-Point.')
+        self.widget.addArg('SSID', QLineEdit(), 'SSID of an Access-Point, 1 ~ 32 characters.')
+        self.widget.addArg('Passphrase', QLineEdit(), 'Passphrase of an Access-Point, 8 ~ 63 characters.')
+        return self.widget
 
     def getArgs(self):
-        pass
+        return {'SSID': self.widget.getArgWidget('SSID').text(), 'Passphrase': self.widget.getArgWidget('Passphrase').text()}
 
     def parse(self, data):
         pass

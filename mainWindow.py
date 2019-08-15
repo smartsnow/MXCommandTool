@@ -26,8 +26,10 @@ class MainWindow(QWidget):
     def __init__(self):
 
         super().__init__()
-        self.setWindowTitle('MX Command Tool Version 1.0 Writen By Snow Yang')
+
         self.resize(1200, 600)
+
+        self.setWindowTitle('MX Command Tool Version 1.0 Writen By Snow Yang')
 
         wl = QHBoxLayout(self)
         split_mainwin = QSplitter()
@@ -47,14 +49,14 @@ class MainWindow(QWidget):
         layout_logwin = QVBoxLayout()
         grpbox_logwin.setLayout(layout_logwin)
 
-        list_log = QListWidget()
-        list_log.addItem('Welcome!')
-        layout_logwin.addWidget(list_log)
+        self.listLog = QListWidget()
+        self.listLog.addItem('Welcome!')
+        layout_logwin.addWidget(self.listLog)
         layout_serial = QHBoxLayout()
         layout_logwin.addLayout(layout_serial)
 
         self.buttonRefreshSerialList = QPushButton(
-            QtGui.QIcon("refresh.png"), 'Refresh')
+            QtGui.QIcon("refresh.png"), '')
         layout_serial.addWidget(self.buttonRefreshSerialList)
         self.combox_serial = QComboBox()
         layout_serial.addWidget(self.combox_serial)
@@ -86,8 +88,9 @@ class MainWindow(QWidget):
         self.tree.setHeaderHidden(True)
         spilt_cmdwin.addWidget(self.tree)
 
-        self.scroll_args = QScrollArea()
-        spilt_cmdwin.addWidget(self.scroll_args)
+        self.scrollCmd = QScrollArea()
+        self.scrollCmd.setWidgetResizable(True)
+        spilt_cmdwin.addWidget(self.scrollCmd)
 
         spilt_cmdwin.setStretchFactor(0, 2)
         spilt_cmdwin.setStretchFactor(1, 5)

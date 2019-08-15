@@ -1,3 +1,5 @@
+# author snowyang
+
 import os
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import QThread, pyqtSignal
@@ -7,7 +9,7 @@ from hci import Hci
 
 class Worker(QThread):
     # Signals
-    signalArgsWindow = pyqtSignal(QWidget)
+    signalCmdWindow = pyqtSignal(QWidget)
     signalSerialComboBox = pyqtSignal(list)
 
     def __init__(self, mainWindow):
@@ -18,11 +20,15 @@ class Worker(QThread):
         self.hci = Hci(self.onHciEvent)
         # Signals
         self.mainWindow.tree.clicked.connect(self.onTreeClicked)
-        self.signalArgsWindow.connect(
-            lambda x: self.mainWindow.scroll_args.setWidget(x))
         self.mainWindow.buttonRefreshSerialList.clicked.connect(
             self.refreshSerialList)
+        self.mainWindow.buttonSendCommand.clicked.connect(self.sendCommand)
+        self.signalCmdWindow.connect(
+            lambda x: self.mainWindow.scrollCmd.setWidget(x))
         self.signalSerialComboBox.connect(self.setSerialComboBoxItems)
+        # Command Widgets
+        self.cmdObjDict = {}
+        self.curCmdName = ''
 
     def run(self):
         pass
@@ -31,11 +37,12 @@ class Worker(QThread):
         info = self.mainWindow.model.fileInfo(index)
         if info.isFile():
             relpath = os.path.relpath(info.filePath())
-            modpath = os.path.splitext(relpath)[0].replace(
+            cmdName = os.path.splitext(relpath)[0].replace(
                 '/', '.').replace('\\', '.')
-            module = import_module(modpath)
-            cmdobj = module.Command()
-            self.signalArgsWindow.emit(cmdobj.widget)
+            if cmdName not in self.cmdObjDict:
+                self.cmdObjDict[cmdName] = import_module(cmdName).Command()
+            self.signalCmdWindow.emit(self.cmdObjDict[cmdName].getWidget())
+            self.curCmdName = cmdName
 
     def refreshSerialList(self):
         portlist = self.hci.slip.portlist()
@@ -44,6 +51,11 @@ class Worker(QThread):
     def setSerialComboBoxItems(self, portlist):
         self.mainWindow.combox_serial.clear()
         self.mainWindow.combox_serial.addItems(portlist)
+
+    def sendCommand(self):
+        args = self.cmdObjDict[self.curCmdName].getArgs()
+        self.mainWindow.listLog.addItem(str(args))
+        self.mainWindow.listLog.scrollToBottom()
 
     def onHciEvent(evt, val):
         pass
