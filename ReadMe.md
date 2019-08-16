@@ -48,6 +48,19 @@ source ~/.zshrc
 $ pip3 install qdarkstyle==2.7 pyqt5==5.10.1 pyserial
 ```
 
+一样的，国内的 PyPi 太慢了，可以切换到国内镜像（清华大学和阿里云）
+
+### 替换 PyPi 源
+
+修改 ~/.pip/pip.conf (没有就创建一个文件夹及文件)
+
+```
+[global]
+index-url = https://pypi.tuna.tsinghua.edu.cn/simple
+[install]
+trusted-host=mirrors.aliyun.com
+```
+
 ## 运行
 
 ```
