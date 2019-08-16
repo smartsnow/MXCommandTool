@@ -13,7 +13,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setFont(QFont("Calibri"))
     app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
-    app.setWindowIcon(QIcon('logo.png'))
+    app.setWindowIcon(QIcon("resources/logo.png"))
     # app.setStyleSheet(open('style.css').read())
     win = MainWindow()
     win.show()

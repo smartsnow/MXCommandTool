@@ -1,8 +1,9 @@
 # author snowyang
 
 import os
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget, QMessageBox
 from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtGui import QIcon
 from importlib import import_module
 from hci import Hci
 
@@ -11,6 +12,7 @@ class Worker(QThread):
     # Signals
     signalCmdWindow = pyqtSignal(QWidget)
     signalSerialComboBox = pyqtSignal(list)
+    signalLogList = pyqtSignal(str)
 
     def __init__(self, mainWindow):
         super(Worker, self).__init__()
@@ -23,15 +25,28 @@ class Worker(QThread):
         self.mainWindow.buttonRefreshSerialList.clicked.connect(
             self.refreshSerialList)
         self.mainWindow.buttonSendCommand.clicked.connect(self.sendCommand)
+        self.mainWindow.buttonOpenCloseSerial.clicked.connect(
+            self.openCloseSerial)
         self.signalCmdWindow.connect(
             lambda x: self.mainWindow.scrollCmd.setWidget(x))
         self.signalSerialComboBox.connect(self.setSerialComboBoxItems)
+        self.signalLogList.connect(self.addLogListItem)
         # Command Widgets
         self.cmdObjDict = {}
         self.curCmdName = ''
 
     def run(self):
-        pass
+        self.refreshSerialList()
+        while True:
+            data = self.hci.read()
+            cmd = data[:2]
+            payload = data[2:]
+            for cmdName in self.cmdObjDict:
+                formatOutput = self.cmdObjDict[cmdName].decode(cmd, payload)
+                if not formatOutput:
+                    continue
+                self.signalLogList.emit(formatOutput)
+                break
 
     def onTreeClicked(self, index):
         info = self.mainWindow.model.fileInfo(index)
@@ -55,9 +70,24 @@ class Worker(QThread):
     def sendCommand(self):
         if self.curCmdName == '':
             return
-        args = self.cmdObjDict[self.curCmdName].getArgs()
-        self.mainWindow.listLog.addItem(str(args))
+        args = self.cmdObjDict[self.curCmdName].encode()
+        self.hci.write(args)
+
+    def openCloseSerial(self):
+        if self.mainWindow.buttonOpenCloseSerial.toolTip() == 'Open Serial':
+            self.hci.open(self.mainWindow.combox_serial.currentText())
+            self.mainWindow.buttonOpenCloseSerial.setIcon(
+                QIcon("resources/opened.png"))
+            self.mainWindow.buttonOpenCloseSerial.setToolTip('Close Serial')
+        else:
+            self.hci.close()
+            self.mainWindow.buttonOpenCloseSerial.setIcon(
+                QIcon("resources/closed.png"))
+            self.mainWindow.buttonOpenCloseSerial.setToolTip('Open Serial')
+
+    def addLogListItem(self, text):
+        self.mainWindow.listLog.addItem(text)
         self.mainWindow.listLog.scrollToBottom()
 
-    def onHciEvent(evt, val):
-        pass
+    def onHciEvent(self, evt, val):
+        print('event=%s, value=%s' % (evt, val))

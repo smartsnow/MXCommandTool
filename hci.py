@@ -77,7 +77,7 @@ class Hci():
 
     def close(self):
         def _close():
-            self.slip.open(comport)
+            self.slip.close()
             self.comport = None
             self.online = False
         self.ctrl_q.put(_close)

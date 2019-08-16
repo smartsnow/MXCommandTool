@@ -8,8 +8,8 @@ class Command():
         self.widget.addArg('Passphrase', QLineEdit(), 'Passphrase of an Access-Point, 8 ~ 63 characters.')
         return self.widget
 
-    def getArgs(self):
-        return {'SSID': self.widget.getArgWidget('SSID').text(), 'Passphrase': self.widget.getArgWidget('Passphrase').text()}
+    def encode(self):
+        return None
 
-    def parse(self, data):
-        pass
+    def decode(self, cmd, payload):
+        return None

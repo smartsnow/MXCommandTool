@@ -7,8 +7,8 @@ class Command():
         self.widget = MxArgsWidget('Scan Access-Points around us.')
         return self.widget
 
-    def getArgs(self):
+    def encode(self):
         return None
 
-    def parse(self, data):
-        pass
+    def decode(self, cmd, payload):
+        return None

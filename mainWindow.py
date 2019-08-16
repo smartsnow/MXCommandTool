@@ -16,9 +16,9 @@ class UsrFileSystemModel(QFileSystemModel):
 class IconProvider(QFileIconProvider):
     def icon(self, fileInfo):
         if fileInfo.isDir():
-            return QtGui.QIcon("folder.png")
+            return QtGui.QIcon("resources/folder.png")
         else:
-            return QtGui.QIcon("file.png")
+            return QtGui.QIcon("resources/file.png")
 
 
 class MainWindow(QWidget):
@@ -56,14 +56,17 @@ class MainWindow(QWidget):
         layout_logwin.addLayout(layout_serial)
 
         self.buttonRefreshSerialList = QPushButton(
-            QtGui.QIcon("refresh.png"), '')
+            QtGui.QIcon("resources/refresh.png"), '')
+        self.buttonRefreshSerialList.setToolTip('Refresh Serial List')
         layout_serial.addWidget(self.buttonRefreshSerialList)
         self.combox_serial = QComboBox()
         layout_serial.addWidget(self.combox_serial)
-        self.buttonOpenSerial = QPushButton(QtGui.QIcon("open.png"), 'Open')
-        layout_serial.addWidget(self.buttonOpenSerial)
+        self.buttonOpenCloseSerial = QPushButton(QtGui.QIcon("resources/closed.png"), '')
+        self.buttonOpenCloseSerial.setToolTip('Open Serial')
+        layout_serial.addWidget(self.buttonOpenCloseSerial)
         layout_serial.addStretch()
-        self.buttonSendCommand = QPushButton(QtGui.QIcon("send.png"), 'Send')
+        self.buttonSendCommand = QPushButton(QtGui.QIcon("resources/send.png"), '')
+        self.buttonSendCommand.setToolTip('Send Command')
         layout_serial.addWidget(self.buttonSendCommand)
 
         # Command window

@@ -9,8 +9,8 @@ class Command():
         self.widget.addArg('Data', MxHexStrEdit(), 'Data to be sent on a socket.')
         return self.widget
 
-    def getArgs(self):
-        return {'FD': self.widget.getArgWidget('FD').text(), 'Data': self.widget.getArgWidget('Data').text()}
+    def encode(self):
+        return None
 
-    def parse(self, data):
-        pass
+    def decode(self, cmd, payload):
+        return None
