@@ -80,10 +80,12 @@ class Worker(QThread):
                 QMessageBox.warning(self.mainWindow, '', 'Open Serial Failed!\n\n%s' % (e), QMessageBox.Yes, QMessageBox.Yes)
             self.mainWindow.buttonOpenCloseSerial.setIcon(QIcon("resources/opened.png"))
             self.mainWindow.buttonOpenCloseSerial.setToolTip('Close Serial')
+            self.mainWindow.buttonSendCommand.setEnabled(True)
         else:
             self.hci.close()
             self.mainWindow.buttonOpenCloseSerial.setIcon(QIcon("resources/closed.png"))
             self.mainWindow.buttonOpenCloseSerial.setToolTip('Open Serial')
+            self.mainWindow.buttonSendCommand.setEnabled(False)
 
     def addLogListItem(self, text):
         self.mainWindow.listLog.addItem(text)
@@ -93,6 +95,7 @@ class Worker(QThread):
         QMessageBox.warning(self.mainWindow, '', text, QMessageBox.Yes, QMessageBox.Yes)
         self.mainWindow.buttonOpenCloseSerial.setIcon(QIcon("resources/closed.png"))
         self.mainWindow.buttonOpenCloseSerial.setToolTip('Open Serial')
+        self.mainWindow.buttonSendCommand.setEnabled(False)
         self.refreshSerialList()
 
     def onHciEvent(self, evt, val):

@@ -67,6 +67,7 @@ class MainWindow(QWidget):
         layout_serial.addStretch()
         self.buttonSendCommand = QPushButton(QtGui.QIcon("resources/send.png"), '')
         self.buttonSendCommand.setToolTip('Send Command')
+        self.buttonSendCommand.setEnabled(False)
         layout_serial.addWidget(self.buttonSendCommand)
 
         # Command window
@@ -90,6 +91,7 @@ class MainWindow(QWidget):
             self.tree.hideColumn(i + 1)
         self.tree.setHeaderHidden(True)
         self.tree.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.tree.setMinimumWidth(180)
         spilt_cmdwin.addWidget(self.tree)
 
         self.scrollCmd = QScrollArea()
