@@ -10,6 +10,38 @@ Author: Snow Yang
 $ brew install python3
 ```
 
+国内的 homebrew 太慢了，可以切换到国内镜像（中国科技大学镜像）
+
+### 替换及重置Homebrew默认源
+
+替换brew.git:
+```
+cd "$(brew --repo)"
+git remote set-url origin https://mirrors.ustc.edu.cn/brew.git
+```
+
+替换homebrew-core.git:
+```
+cd "$(brew --repo)/Library/Taps/homebrew/homebrew-core"
+git remote set-url origin https://mirrors.ustc.edu.cn/homebrew-core.git
+```
+
+### Homebrew Bottles源
+
+对于bash用户：
+
+```
+echo 'export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.ustc.edu.cn/homebrew-bottles' >> ~/.bash_profile
+source ~/.bash_profile
+```
+
+对于zsh用户
+
+```
+echo 'export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.ustc.edu.cn/homebrew-bottles' >> ~/.zshrc
+source ~/.zshrc
+```
+
 ## 安装依赖包
 
 ```
