@@ -4,6 +4,22 @@ import os
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore, QtGui
 
+listLogStyleSheet = \
+'''
+QListWidget::item
+{
+    border: 1px solid #32414B;
+    border-radius: 4px;
+}
+'''
+
+groupBoxStyleSheet = \
+'''
+QGroupBox::title 
+{
+    subcontrol-position: top center; 
+}
+'''
 
 class UsrFileSystemModel(QFileSystemModel):
     def data(self, index, role):
@@ -37,9 +53,11 @@ class MainWindow(QWidget):
 
         # Main window
         grpbox_logwin = QGroupBox('Log Window')
+        grpbox_logwin.setStyleSheet(groupBoxStyleSheet)
         split_mainwin.addWidget(grpbox_logwin)
 
         grpbox_cmdwin = QGroupBox('Command Window')
+        grpbox_cmdwin.setStyleSheet(groupBoxStyleSheet)
         split_mainwin.addWidget(grpbox_cmdwin)
 
         split_mainwin.setStretchFactor(0, 2)
@@ -50,6 +68,7 @@ class MainWindow(QWidget):
         grpbox_logwin.setLayout(layout_logwin)
 
         self.listLog = QListWidget()
+        self.listLog.setStyleSheet(listLogStyleSheet)
         self.listLog.addItem('Welcome!')
         layout_logwin.addWidget(self.listLog)
         layout_serial = QHBoxLayout()
