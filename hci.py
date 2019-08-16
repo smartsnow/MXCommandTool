@@ -18,13 +18,10 @@ class Hci():
         self.slip = slip.Slip()
         self.send_seq = 0
         self.recv_seq = -1
-        self.ctrl_q = queue.Queue()
         self.send_q = queue.Queue()
         self.recv_q = queue.Queue()
         self.on_event = on_event
-        self.online = False
-        self.th = threading.Thread(target=self.daemon, daemon=True)
-        self.th.start()
+        self.forceThreadExit = False
 
     def write(self, _data):
         self.send_q.put(_data)
@@ -32,55 +29,34 @@ class Hci():
     def read(self):
         return self.recv_q.get()
 
-    def try_open(self):
-        if self.comport == None:
-            return
-        if self.comport not in self.slip.portlist():
-            self.ctrl_q.put(self.try_open)
-            return
-        self.slip.open(self.comport)
-        self.online = True
-        self.on_event("resume", self.comport)
-
     def daemon(self):
         # it's a daemon thread, only it has the right to access comport.
         # user's operation is pushed into queue, poped by this thread
         # and is excuted one-by-one.
         while True:
             try:
-                # do control
-                if self.ctrl_q.qsize() > 0:
-                    ctrl = self.ctrl_q.get()
-                    ctrl()
-                # not online, continue
-                if self.online != True:
-                    # sleep at here to reduce cpu cosumption
-                    time.sleep(0.1)
-                    continue
                 # do send
                 if self.send_q.qsize() > 0:
                     self.output(self.send_q.get())
                 # do recv
                 self.yield_until(HCI_DATA, 10)
+                if self.forceThreadExit == True:
+                    break
             except serial.SerialException as e:
                 self.slip.close()
-                self.online = False
-                self.ctrl_q.put(self.try_open)
-                self.on_event("close", e)
+                self.on_event("serial", e)
+                break
 
     def open(self, comport):
-        def _open():
-            self.comport = comport
-            self.slip.open(comport)
-            self.online = True
-        self.ctrl_q.put(_open)
+        self.slip.open(comport)
+        self.th = threading.Thread(target=self.daemon, daemon=True)
+        self.th.start()
 
     def close(self):
-        def _close():
-            self.slip.close()
-            self.comport = None
-            self.online = False
-        self.ctrl_q.put(_close)
+        self.forceThreadExit = True
+        self.th.join()
+        self.forceThreadExit = False
+        self.slip.close()
 
     def send_data(self, frame, retry):
         retry = 3
@@ -119,7 +95,7 @@ class Hci():
             # no frame, continue
             if frame == b'':
                 continue
-            
+
             # got a frame
             # cut type, seq, data and crc from frame
             _type, _seq, _data, _crc = frame[0], frame[1], frame[2:-2], frame[-2:]
@@ -150,9 +126,10 @@ class Hci():
             # return true if we got a expect type
             if _type == expect_type:
                 return True
-        
+
         # return false if timeout
         return False
+
 
 if __name__ == "__main__":
 

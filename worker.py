@@ -13,6 +13,7 @@ class Worker(QThread):
     signalCmdWindow = pyqtSignal(QWidget)
     signalSerialComboBox = pyqtSignal(list)
     signalLogList = pyqtSignal(str)
+    signalSerialException = pyqtSignal(str)
 
     def __init__(self, mainWindow):
         super(Worker, self).__init__()
@@ -22,15 +23,13 @@ class Worker(QThread):
         self.hci = Hci(self.onHciEvent)
         # Signals
         self.mainWindow.tree.clicked.connect(self.onTreeClicked)
-        self.mainWindow.buttonRefreshSerialList.clicked.connect(
-            self.refreshSerialList)
+        self.mainWindow.buttonRefreshSerialList.clicked.connect(self.refreshSerialList)
         self.mainWindow.buttonSendCommand.clicked.connect(self.sendCommand)
-        self.mainWindow.buttonOpenCloseSerial.clicked.connect(
-            self.openCloseSerial)
-        self.signalCmdWindow.connect(
-            lambda x: self.mainWindow.scrollCmd.setWidget(x))
+        self.mainWindow.buttonOpenCloseSerial.clicked.connect(self.openCloseSerial)
+        self.signalCmdWindow.connect(lambda x: self.mainWindow.scrollCmd.setWidget(x))
         self.signalSerialComboBox.connect(self.setSerialComboBoxItems)
         self.signalLogList.connect(self.addLogListItem)
+        self.signalSerialException.connect(self.SerialExceptionHandler)
         # Command Widgets
         self.cmdObjDict = {}
         self.curCmdName = ''
@@ -75,19 +74,29 @@ class Worker(QThread):
 
     def openCloseSerial(self):
         if self.mainWindow.buttonOpenCloseSerial.toolTip() == 'Open Serial':
-            self.hci.open(self.mainWindow.combox_serial.currentText())
-            self.mainWindow.buttonOpenCloseSerial.setIcon(
-                QIcon("resources/opened.png"))
+            try:
+                self.hci.open(self.mainWindow.combox_serial.currentText())
+            except Exception as e:
+                QMessageBox.warning(self.mainWindow, '', 'Open Serial Failed!\n\n%s' % (e), QMessageBox.Yes, QMessageBox.Yes)
+            self.mainWindow.buttonOpenCloseSerial.setIcon(QIcon("resources/opened.png"))
             self.mainWindow.buttonOpenCloseSerial.setToolTip('Close Serial')
         else:
             self.hci.close()
-            self.mainWindow.buttonOpenCloseSerial.setIcon(
-                QIcon("resources/closed.png"))
+            self.mainWindow.buttonOpenCloseSerial.setIcon(QIcon("resources/closed.png"))
             self.mainWindow.buttonOpenCloseSerial.setToolTip('Open Serial')
 
     def addLogListItem(self, text):
         self.mainWindow.listLog.addItem(text)
         self.mainWindow.listLog.scrollToBottom()
 
+    def SerialExceptionHandler(self, text):
+        QMessageBox.warning(self.mainWindow, '', text, QMessageBox.Yes, QMessageBox.Yes)
+        self.mainWindow.buttonOpenCloseSerial.setIcon(QIcon("resources/closed.png"))
+        self.mainWindow.buttonOpenCloseSerial.setToolTip('Open Serial')
+        self.refreshSerialList()
+
     def onHciEvent(self, evt, val):
         print('event=%s, value=%s' % (evt, val))
+        if evt == 'serial':
+            self.signalSerialException.emit('Serial Exception!\n\n%s' % (val))
+
