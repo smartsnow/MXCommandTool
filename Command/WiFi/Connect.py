@@ -9,7 +9,12 @@ class Command():
         return self.widget
 
     def encode(self):
-        return None
+        ssidinput = self.widget.getArgWidget('SSID').text().encode()
+        ssidlen = len(ssidinput)
+        keyinput = self.widget.getArgWidget('Passphrase').text().encode()
+        keylen = len(keyinput)
+        command = b'\x16\x10' + b'\x02' + ssidlen.to_bytes(2, 'little') + ssidinput + b'\x02' + keylen.to_bytes(2, 'little') + keyinput 
+        return command
 
     def decode(self, cmd, payload):
         return None

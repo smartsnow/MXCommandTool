@@ -8,9 +8,9 @@ class Command():
         return self.widget
 
     def encode(self):
-        return b'\x04\x10'
+        return b'\x11\x10'
 
     def decode(self, cmd, payload):
-        if cmd != b'\x03\x20':
+        if cmd != b'\x0a\x20':
             return None
         return 'MAC address: %s' % (payload[3:].hex().upper())
