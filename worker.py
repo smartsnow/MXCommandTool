@@ -78,6 +78,7 @@ class Worker(QThread):
                 self.hci.open(self.mainWindow.combox_serial.currentText())
             except Exception as e:
                 QMessageBox.warning(self.mainWindow, '', 'Open Serial Failed!\n\n%s' % (e), QMessageBox.Yes, QMessageBox.Yes)
+                return
             self.mainWindow.buttonOpenCloseSerial.setIcon(QIcon("resources/opened.png"))
             self.mainWindow.buttonOpenCloseSerial.setToolTip('Close Serial')
             self.mainWindow.buttonSendCommand.setEnabled(True)
