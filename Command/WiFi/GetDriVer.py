@@ -4,13 +4,13 @@ from mxArgWidgets import *
 class Command():
 
     def getWidget(self):
-        self.widget = MxArgsWidget("Get Wi-Fi module's version.")
+        self.widget = MxArgsWidget("Get Wi-Fi module's driver version.")
         return self.widget
 
     def encode(self):
-        return b'\x03\x10'
+        return b'\x10\x10'
 
     def decode(self, cmd, payload):
-        if cmd != b'\x02\x20':
+        if cmd != b'\x09\x20':
             return None
         return 'Version: %s' % (payload[3:].decode())
