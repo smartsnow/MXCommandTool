@@ -5,6 +5,10 @@ import time
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore, QtGui
 
+longDescription = '''Version\t: 1.0.0
+Author\t: Snow Yang
+Bug Reports\t: yangsw@mxchip.com'''
+
 groupBoxStyleSheet = \
     '''
 QGroupBox::title 
@@ -12,7 +16,6 @@ QGroupBox::title
     subcontrol-position: top center; 
 }
 '''
-
 
 class UsrFileSystemModel(QFileSystemModel):
     def data(self, index, role):
@@ -55,7 +58,7 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.resize(1200, 600)
-        self.setWindowTitle('MX Command Tool Version 1.0 Writen By Snow Yang')
+        self.setWindowTitle('MX Command Tool')
 
         wl = QHBoxLayout(self)
         split_mainwin = QSplitter()
@@ -78,7 +81,7 @@ class MainWindow(QWidget):
         grpbox_logwin.setLayout(layout_logwin)
 
         self.logTable = LogTableWidget()
-        self.logTable.addRow([time.strftime("%T"), '', 'Welcome!'])
+        self.logTable.addRow([time.strftime("%T"), '', longDescription])
         self.logTable.resizeColumnsToContents()
         layout_logwin.addWidget(self.logTable)
         layout_serial = QHBoxLayout()
@@ -94,6 +97,10 @@ class MainWindow(QWidget):
             QtGui.QIcon("resources/closed.png"), '')
         self.buttonOpenCloseSerial.setToolTip('Open Serial')
         layout_serial.addWidget(self.buttonOpenCloseSerial)
+        self.buttonClearLogWindow = QPushButton(
+            QtGui.QIcon("resources/clear.png"), '')
+        self.buttonClearLogWindow.setToolTip('Clear Log Window')
+        layout_serial.addWidget(self.buttonClearLogWindow)
         layout_serial.addStretch()
         self.buttonSendCommand = QPushButton(
             QtGui.QIcon("resources/send.png"), '')

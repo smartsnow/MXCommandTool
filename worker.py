@@ -13,7 +13,7 @@ class Worker(QThread):
     # Signals
     signalCmdWindow = pyqtSignal(QWidget)
     signalSerialComboBox = pyqtSignal(list)
-    signalLogList = pyqtSignal(list)
+    signalLogTableAddRow = pyqtSignal(list)
     signalSerialException = pyqtSignal(str)
 
     def __init__(self, mainWindow):
@@ -27,9 +27,10 @@ class Worker(QThread):
         self.mainWindow.buttonRefreshSerialList.clicked.connect(self.refreshSerialList)
         self.mainWindow.buttonSendCommand.clicked.connect(self.sendCommand)
         self.mainWindow.buttonOpenCloseSerial.clicked.connect(self.openCloseSerial)
+        self.mainWindow.buttonClearLogWindow.clicked.connect(self.clearLogWindow)
         self.signalCmdWindow.connect(lambda x: self.mainWindow.scrollCmd.setWidget(x))
         self.signalSerialComboBox.connect(self.setSerialComboBoxItems)
-        self.signalLogList.connect(self.addLogListItem)
+        self.signalLogTableAddRow.connect(self.addLogListItem)
         self.signalSerialException.connect(self.SerialExceptionHandler)
         # Command Widgets
         self.cmdObjDict = {}
@@ -45,7 +46,7 @@ class Worker(QThread):
                 formatOutput = self.cmdObjDict[cmdName].decode(cmd, payload)
                 if not formatOutput:
                     continue
-                self.signalLogList.emit([time.strftime("%T"), cmdName, formatOutput])
+                self.signalLogTableAddRow.emit([time.strftime("%T"), cmdName, formatOutput])
                 break
 
     def onTreeClicked(self, index):
@@ -58,6 +59,9 @@ class Worker(QThread):
                 self.cmdObjDict[cmdName] = import_module(cmdName).Command()
             self.signalCmdWindow.emit(self.cmdObjDict[cmdName].getWidget())
             self.curCmdName = cmdName
+
+    def clearLogWindow(self):
+        self.mainWindow.logTable.setRowCount(0)
 
     def refreshSerialList(self):
         portlist = self.hci.slip.portlist()
