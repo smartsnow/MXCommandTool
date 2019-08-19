@@ -27,4 +27,4 @@ class Command():
         # info.bssid = payload[36:41]
         info.channel = payload[41]
         # info.rssi = int(payload[42:])
-        return 'WiFi(%d) ssid(%s) channel(%d)' % (info.is_connected, info.ssid.decode(), info.channel)
+        return 'WiFi(%d)\r\nssid(%s)\r\nchannel(%d)' % (info.is_connected, info.ssid.decode(), info.channel)

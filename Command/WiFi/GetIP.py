@@ -5,14 +5,15 @@ class Command():
 
     def getWidget(self):
         self.widget = MxArgsWidget('Get IP of Wi-Fi interface')
-        self.widget.addArg('MODE', QLineEdit(), 'Wi-Fi interface: 0 SoftAP Mode, 1 Station Mode')
+        self.widget.addArg('Interface', QComboBox(), 'Wi-Fi interface: SoftAP or Station')
+        self.widget.getArgWidget('Interface').addItems(['Station', 'SoftAP'])
         return self.widget
 
     def encode(self):
-        mode = self.widget.getArgWidget('MODE').text().encode()
-        if mode == b'0':
+        mode = self.widget.getArgWidget('Interface').currentText()
+        if mode == 'SoftAP':
             return b'\x14\x10' + b'\x01' + b'\x00\x00\x00\x00'
-        elif mode == b'1':
+        elif mode == 'Station':
             return b'\x14\x10' + b'\x01' + b'\x01\x00\x00\x00'
 
     def decode(self, cmd, payload):

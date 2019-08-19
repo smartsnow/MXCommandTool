@@ -14,4 +14,4 @@ class Command():
     def decode(self, cmd, payload):
         if cmd != eventTable['wifi_mac_get_event']:
             return None
-        return 'MAC address: %s' % (payload[3:].hex().upper())
+        return payload[3:].hex().upper()

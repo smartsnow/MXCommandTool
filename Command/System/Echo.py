@@ -17,4 +17,4 @@ class Command():
     def decode(self, cmd, payload):
         if cmd != b'\x01\x20':
             return None
-        return 'Echo: %s' % (payload[3:].decode())
+        return payload[3:].decode()

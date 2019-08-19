@@ -1,6 +1,7 @@
 # author snowyang
 
 import os
+import time
 from PyQt5.QtWidgets import QWidget, QMessageBox
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import QIcon
@@ -12,7 +13,7 @@ class Worker(QThread):
     # Signals
     signalCmdWindow = pyqtSignal(QWidget)
     signalSerialComboBox = pyqtSignal(list)
-    signalLogList = pyqtSignal(str)
+    signalLogList = pyqtSignal(list)
     signalSerialException = pyqtSignal(str)
 
     def __init__(self, mainWindow):
@@ -44,7 +45,7 @@ class Worker(QThread):
                 formatOutput = self.cmdObjDict[cmdName].decode(cmd, payload)
                 if not formatOutput:
                     continue
-                self.signalLogList.emit(formatOutput)
+                self.signalLogList.emit([time.strftime("%T"), cmdName, formatOutput])
                 break
 
     def onTreeClicked(self, index):
@@ -88,9 +89,9 @@ class Worker(QThread):
             self.mainWindow.buttonOpenCloseSerial.setToolTip('Open Serial')
             self.mainWindow.buttonSendCommand.setEnabled(False)
 
-    def addLogListItem(self, text):
-        self.mainWindow.listLog.addItem(text)
-        self.mainWindow.listLog.scrollToBottom()
+    def addLogListItem(self, rowItems):
+        self.mainWindow.logTable.addRow(rowItems)
+        self.mainWindow.logTable.scrollToBottom()
 
     def SerialExceptionHandler(self, text):
         QMessageBox.warning(self.mainWindow, '', text, QMessageBox.Yes, QMessageBox.Yes)

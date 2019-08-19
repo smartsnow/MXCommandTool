@@ -13,4 +13,4 @@ class Command():
     def decode(self, cmd, payload):
         if cmd != b'\x04\x20':
             return None
-        return 'Firmware version: %s' % (payload[3:].decode())
+        return payload[3:].decode()

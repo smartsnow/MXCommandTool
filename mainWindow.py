@@ -1,25 +1,18 @@
 # author snowyang
 
 import os
+import time
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore, QtGui
 
-listLogStyleSheet = \
-'''
-QListWidget::item
-{
-    border: 1px solid #32414B;
-    border-radius: 4px;
-}
-'''
-
 groupBoxStyleSheet = \
-'''
+    '''
 QGroupBox::title 
 {
     subcontrol-position: top center; 
 }
 '''
+
 
 class UsrFileSystemModel(QFileSystemModel):
     def data(self, index, role):
@@ -37,14 +30,31 @@ class IconProvider(QFileIconProvider):
             return QtGui.QIcon("resources/file.png")
 
 
+class LogTableWidget(QTableWidget):
+
+    def __init__(self):
+        super().__init__()
+        headerLabels = ['Time', 'Command', 'Value']
+        self.setColumnCount(len(headerLabels))
+        self.setHorizontalHeaderLabels(headerLabels)
+        self.verticalHeader().setVisible(False)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.horizontalHeader().setStretchLastSection(True)
+
+    def addRow(self, rowItems):
+        rowPosition = self.rowCount()
+        self.insertRow(rowPosition)
+        for i in range(self.columnCount()):
+            self.setItem(rowPosition, i, QTableWidgetItem(rowItems[i]))
+        self.resizeRowToContents(rowPosition)
+
+
 class MainWindow(QWidget):
 
     def __init__(self):
-
         super().__init__()
-
         self.resize(1200, 600)
-
         self.setWindowTitle('MX Command Tool Version 1.0 Writen By Snow Yang')
 
         wl = QHBoxLayout(self)
@@ -67,10 +77,10 @@ class MainWindow(QWidget):
         layout_logwin = QVBoxLayout()
         grpbox_logwin.setLayout(layout_logwin)
 
-        self.listLog = QListWidget()
-        self.listLog.setStyleSheet(listLogStyleSheet)
-        self.listLog.addItem('Welcome!')
-        layout_logwin.addWidget(self.listLog)
+        self.logTable = LogTableWidget()
+        self.logTable.addRow([time.strftime("%T"), '', 'Welcome!'])
+        self.logTable.resizeColumnsToContents()
+        layout_logwin.addWidget(self.logTable)
         layout_serial = QHBoxLayout()
         layout_logwin.addLayout(layout_serial)
 
@@ -80,11 +90,13 @@ class MainWindow(QWidget):
         layout_serial.addWidget(self.buttonRefreshSerialList)
         self.combox_serial = QComboBox()
         layout_serial.addWidget(self.combox_serial)
-        self.buttonOpenCloseSerial = QPushButton(QtGui.QIcon("resources/closed.png"), '')
+        self.buttonOpenCloseSerial = QPushButton(
+            QtGui.QIcon("resources/closed.png"), '')
         self.buttonOpenCloseSerial.setToolTip('Open Serial')
         layout_serial.addWidget(self.buttonOpenCloseSerial)
         layout_serial.addStretch()
-        self.buttonSendCommand = QPushButton(QtGui.QIcon("resources/send.png"), '')
+        self.buttonSendCommand = QPushButton(
+            QtGui.QIcon("resources/send.png"), '')
         self.buttonSendCommand.setToolTip('Send Command')
         self.buttonSendCommand.setEnabled(False)
         layout_serial.addWidget(self.buttonSendCommand)
