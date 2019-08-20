@@ -1,4 +1,5 @@
 from mxArgWidgets import *
+from cmdTable import cmdTable, eventTable
 
 class Command():
 
@@ -13,7 +14,7 @@ class Command():
         ssidlen = len(ssidinput)
         keyinput = self.widget.getArgWidget('Passphrase').text().encode()
         keylen = len(keyinput)
-        command = b'\x16\x10' + b'\x02' + ssidlen.to_bytes(2, 'little') + ssidinput + b'\x02' + keylen.to_bytes(2, 'little') + keyinput 
+        command = cmdTable['wifi_connect_cmd'] + b'\x02' + ssidlen.to_bytes(2, 'little') + ssidinput + b'\x02' + keylen.to_bytes(2, 'little') + keyinput 
         return command
 
     def decode(self, cmd, payload):

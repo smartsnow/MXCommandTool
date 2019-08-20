@@ -1,5 +1,5 @@
 from mxArgWidgets import *
-
+from cmdTable import cmdTable, eventTable
 
 class Command():
 
@@ -8,9 +8,9 @@ class Command():
         return self.widget
 
     def encode(self):
-        return b'\x05\x10'
+        return cmdTable['system_firmware_version_get_cmd']
 
     def decode(self, cmd, payload):
-        if cmd != b'\x04\x20':
+        if cmd != eventTable['system_firmware_version_get_event']:
             return None
         return payload[3:].decode()

@@ -1,5 +1,5 @@
 from mxArgWidgets import *
-
+from cmdTable import cmdTable, eventTable
 
 class Command():
 
@@ -12,11 +12,11 @@ class Command():
     def encode(self):
         mode = self.widget.getArgWidget('Interface').currentText()
         if mode == 'SoftAP':
-            return b'\x14\x10' + b'\x01' + b'\x00\x00\x00\x00'
+            return cmdTable['wifi_ip_get_cmd'] + b'\x01' + b'\x00\x00\x00\x00'
         elif mode == 'Station':
-            return b'\x14\x10' + b'\x01' + b'\x01\x00\x00\x00'
+            return cmdTable['wifi_ip_get_cmd'] + b'\x01' + b'\x01\x00\x00\x00'
 
     def decode(self, cmd, payload):
-        if cmd != b'\x0c\x20':
+        if cmd != eventTable['wifi_ip_get_event']:
             return None
         return 'IP: %s\r\nNetMask: %s\r\nGateway: %s\r\nDns server:%s' % (payload[3:19].decode(), payload[19:35].decode(), payload[35:51].decode(), payload[51:].decode())
