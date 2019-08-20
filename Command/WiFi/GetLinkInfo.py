@@ -1,13 +1,17 @@
 from mxArgWidgets import *
-from ctypes import *
+from cmdTable import cmdTable, eventTable
+from construct import *
 
-
-class wifi_info(Structure):
-    _fields_ = [('is_connected', c_uint8),
-                ('ssid', c_char*33),
-                ('bssid', c_uint8*6),
-                ('channel', c_uint8),
-                ('rssi', c_int)]
+info = Struct(
+    'type' /Int8ub,
+    'pointlen' /BytesInteger(2, swapped=True),
+    'is_connected' /Int8ub,
+    'ssid' /Bytes(32),
+    'bssid' /Bytes(6),
+    'security' /Int8ub,
+    'channel' /Int8ub,
+    'rssi' /BytesInteger(4, signed=True, swapped=True)
+)
 
 class Command():
 
@@ -16,15 +20,12 @@ class Command():
         return self.widget
 
     def encode(self):
-        return b'\x15\x10'
+        return cmdTable['wifi_link_info_get_cmd']
 
     def decode(self, cmd, payload):
-        if cmd != b'\x0d\x20':
+        if cmd != eventTable['wifi_link_info_get_event']:
             return None
-        info = wifi_info()
-        info.is_connected = payload[3]
-        info.ssid = payload[4:36]
-        # info.bssid = payload[36:41]
-        info.channel = payload[41]
-        # info.rssi = int(payload[42:])
-        return 'WiFi(%d)\r\nssid(%s)\r\nchannel(%d)' % (info.is_connected, info.ssid.decode(), info.channel)
+
+        result = info.parse(payload)
+        output = ('connected: %d\r\nssid: %s\r\nbssid: %s\r\nsecurity: %d\r\nchannel: %d\r\n\rssi: %d' % (result.is_connected, result.ssid.decode(), result.bssid.hex().upper() , result.security, result.channel, result.rssi))
+        return output

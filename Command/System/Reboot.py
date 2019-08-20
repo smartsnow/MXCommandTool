@@ -1,5 +1,5 @@
 from mxArgWidgets import *
-
+from cmdTable import cmdTable, eventTable
 
 class Command():
 
@@ -8,7 +8,7 @@ class Command():
         return self.widget
 
     def encode(self):
-        return b'\x02\x10'
+        return cmdTable['system_reboot_cmd']
 
     def decode(self, cmd, payload):
         return None

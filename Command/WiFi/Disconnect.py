@@ -1,5 +1,5 @@
 from mxArgWidgets import *
-
+from cmdTable import cmdTable, eventTable
 
 class Command():
 
@@ -8,7 +8,7 @@ class Command():
         return self.widget
 
     def encode(self):
-        return b'\x17\x10'
+        return cmdTable['wifi_disconnect_cmd']
 
     def decode(self, cmd, payload):
         return None

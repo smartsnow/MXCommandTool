@@ -1,5 +1,5 @@
 from mxArgWidgets import *
-
+from cmdTable import cmdTable, eventTable
 
 class Command():
 
@@ -11,10 +11,10 @@ class Command():
     def encode(self):
         userinput = self.widget.getArgWidget('Data').text().encode()
         length = len(userinput)
-        command = b'\x01\x10' + b'\x02' + length.to_bytes(2, 'little') + userinput
+        command = cmdTable['ipc_echo_cmd'] + b'\x02' + length.to_bytes(2, 'little') + userinput
         return command
 
     def decode(self, cmd, payload):
-        if cmd != b'\x01\x20':
+        if cmd != eventTable['ipc_echo_event']:
             return None
         return payload[3:].decode()
