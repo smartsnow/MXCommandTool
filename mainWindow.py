@@ -4,6 +4,7 @@ import os
 import time
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore, QtGui
+from worker import Worker
 
 longDescription = '''Version\t: 1.0.0
 Author\t: Snow Yang
@@ -16,6 +17,7 @@ QGroupBox::title
     subcontrol-position: top center; 
 }
 '''
+
 
 class UsrFileSystemModel(QFileSystemModel):
     def data(self, index, role):
@@ -138,3 +140,20 @@ class MainWindow(QWidget):
 
         spilt_cmdwin.setStretchFactor(0, 2)
         spilt_cmdwin.setStretchFactor(1, 5)
+
+        self.worker = Worker(self)
+        self.worker.start()
+
+    def closeEvent(self, event):
+        reply = QMessageBox.question(self,
+                                     '',
+                                     'Exit?',
+                                     QMessageBox.Yes | QMessageBox.No,
+                                     QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            if self.worker.curCmdName:
+                self.worker.saveRecordFromArgsWidget(self.worker.curCmdName, self.worker.mainWindow.scrollCmd.widget())
+            self.worker.argsJson.save()
+            event.accept()
+        else:
+            event.ignore()

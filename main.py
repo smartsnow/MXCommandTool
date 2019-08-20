@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from mainWindow import MainWindow
-from worker import Worker
 
 if __name__ == "__main__":
 
@@ -22,7 +21,5 @@ if __name__ == "__main__":
     # app.setStyleSheet(open('style.css').read())
     win = MainWindow()
     win.show()
-    worker = Worker(win)
-    worker.start()
     splash.finish(win)
     sys.exit(app.exec_())

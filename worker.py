@@ -2,17 +2,16 @@
 
 import os
 import time
-from PyQt5.QtWidgets import QWidget, QMessageBox
+import json
+from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import QIcon
 from importlib import import_module
 from hci import Hci
-
+from argsJson import ArgsJson
 
 class Worker(QThread):
     # Signals
-    signalCmdWindow = pyqtSignal(QWidget)
-    signalSerialComboBox = pyqtSignal(list)
     signalLogTableAddRow = pyqtSignal(list)
     signalSerialException = pyqtSignal(str)
 
@@ -28,16 +27,15 @@ class Worker(QThread):
         self.mainWindow.buttonSendCommand.clicked.connect(self.sendCommand)
         self.mainWindow.buttonOpenCloseSerial.clicked.connect(self.openCloseSerial)
         self.mainWindow.buttonClearLogWindow.clicked.connect(self.clearLogWindow)
-        self.signalCmdWindow.connect(lambda x: self.mainWindow.scrollCmd.setWidget(x))
-        self.signalSerialComboBox.connect(self.setSerialComboBoxItems)
         self.signalLogTableAddRow.connect(self.addLogListItem)
         self.signalSerialException.connect(self.SerialExceptionHandler)
         # Command Widgets
         self.cmdObjDict = {}
         self.curCmdName = ''
+        self.refreshSerialList()
+        self.argsJson = ArgsJson()
 
     def run(self):
-        self.refreshSerialList()
         while True:
             data = self.hci.read()
             cmd = data[:2]
@@ -57,17 +55,34 @@ class Worker(QThread):
                 '/', '.').replace('\\', '.')
             if cmdName not in self.cmdObjDict:
                 self.cmdObjDict[cmdName] = import_module(cmdName).Command()
-            self.signalCmdWindow.emit(self.cmdObjDict[cmdName].getWidget())
+            if self.curCmdName:
+                self.saveRecordFromArgsWidget(self.curCmdName, self.mainWindow.scrollCmd.widget())
+            self.mainWindow.scrollCmd.setWidget(self.cmdObjDict[cmdName].getWidget())
+            if cmdName in self.argsJson.argsDict:
+                self.loadRecordToArgsWidget(cmdName, self.mainWindow.scrollCmd.widget())
             self.curCmdName = cmdName
+            self.argsJson.argsDict['curCmdName'] = cmdName
+
+    def saveRecordFromArgsWidget(self, name, widget):
+        curDict = {}
+        for argName in widget.argWidgetDict:
+            argWidget = widget.argWidgetDict[argName]
+            if type(argWidget) == QLineEdit:
+                curDict[argName] = argWidget.text()
+        self.argsJson.argsDict[name] = curDict
+
+    def loadRecordToArgsWidget(self, name, widget):
+        curDict = self.argsJson.argsDict[name]
+        for argName in widget.argWidgetDict:
+            argWidget = widget.argWidgetDict[argName]
+            if type(argWidget) == QLineEdit:
+                argWidget.setText(curDict[argName])
 
     def clearLogWindow(self):
         self.mainWindow.logTable.setRowCount(0)
 
     def refreshSerialList(self):
         portlist = self.hci.slip.portlist()
-        self.signalSerialComboBox.emit(portlist)
-
-    def setSerialComboBoxItems(self, portlist):
         self.mainWindow.combox_serial.clear()
         self.mainWindow.combox_serial.addItems(portlist)
 
