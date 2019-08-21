@@ -12,5 +12,10 @@ class Command():
     def encode(self):
         return None
 
-    def decode(self, cmd, payload):
+class Event():
+
+    code = None
+    name = None
+
+    def decode(self, payload):
         return None

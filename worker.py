@@ -31,21 +31,37 @@ class Worker(QThread):
         self.signalSerialException.connect(self.SerialExceptionHandler)
         # Command Widgets
         self.cmdObjDict = {}
+        self.evtObjDict = {}
         self.curCmdName = ''
         self.refreshSerialList()
         self.argsJson = ArgsJson()
+        self.walkScripts()
+
+    def walkScripts(self):
+        for root, dirs, files in os.walk("Command", topdown=False):
+            for name in files:
+                if not name.endswith('.py'):
+                    continue
+                cmdName = os.path.splitext(os.path.join(root, name))[0].replace('/', '.').replace('\\', '.')
+                module = import_module(cmdName)
+                self.cmdObjDict[cmdName] = module.Command()
+                if 'Event' in dir(module):
+                    evtObj = module.Event()
+                    self.evtObjDict[evtObj.code] = evtObj
+
+        for root, dirs, files in os.walk("Event", topdown=False):
+            for name in files:
+                evtObj = module.Event()
+                self.evtObjDict[evtObj.code] = evtObj
 
     def run(self):
         while True:
             data = self.hci.read()
-            cmd = data[:2]
+            code = data[:2]
             payload = data[2:]
-            for cmdName in self.cmdObjDict:
-                formatOutput = self.cmdObjDict[cmdName].decode(cmd, payload)
-                if not formatOutput:
-                    continue
-                self.signalLogTableAddRow.emit([time.strftime("%T"), cmdName, formatOutput])
-                break
+            if code in self.evtObjDict:
+                value = self.evtObjDict[code].decode(payload)
+                self.signalLogTableAddRow.emit([time.strftime("%T"), 'Receive', self.evtObjDict[code].name, value])
 
     def onTreeClicked(self, index):
         info = self.mainWindow.model.fileInfo(index)
@@ -53,8 +69,6 @@ class Worker(QThread):
             relpath = os.path.relpath(info.filePath())
             cmdName = os.path.splitext(relpath)[0].replace(
                 '/', '.').replace('\\', '.')
-            if cmdName not in self.cmdObjDict:
-                self.cmdObjDict[cmdName] = import_module(cmdName).Command()
             if self.curCmdName:
                 self.saveRecordFromArgsWidget(self.curCmdName, self.mainWindow.scrollCmd.widget())
             self.mainWindow.scrollCmd.setWidget(self.cmdObjDict[cmdName].getWidget())
@@ -91,6 +105,7 @@ class Worker(QThread):
             return
         args = self.cmdObjDict[self.curCmdName].encode()
         self.hci.write(args)
+        self.signalLogTableAddRow.emit([time.strftime("%T"), 'Send', self.curCmdName, ''])
 
     def openCloseSerial(self):
         if self.mainWindow.buttonOpenCloseSerial.toolTip() == 'Open Serial':

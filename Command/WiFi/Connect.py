@@ -73,7 +73,3 @@ class Command():
             command += b'\x02' + ipattrlen.to_bytes(2, 'little') + ipcmd
             print(command)
             return command
-
-    def decode(self, cmd, payload):
-        return None
- 

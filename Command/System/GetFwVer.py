@@ -10,7 +10,10 @@ class Command():
     def encode(self):
         return cmdTable['system_firmware_version_get_cmd']
 
-    def decode(self, cmd, payload):
-        if cmd != eventTable['system_firmware_version_get_event']:
-            return None
+class Event():
+
+    code = eventTable['system_firmware_version_get_event']
+    name = 'Firmware Version'
+
+    def decode(self, payload):
         return payload[3:].decode()

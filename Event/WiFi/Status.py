@@ -9,19 +9,12 @@ fmt = Struct(
     'status' /BytesInteger(4, swapped=True)
 )
 
-class Command():
+class Event():
 
-    def getWidget(self):
-        self.widget = MxArgsWidget('Wi-Fi status event.')
-        return self.widget
+    code = eventTable['wifi_status_event']
+    name = 'Wi-Fi status'
 
-    def encode(self):
-        return None
-
-    def decode(self, cmd, payload):
-        if cmd != eventTable['wifi_status_event']:
-            return None
-
+    def decode(self, payload):
         result = fmt.parse(payload)
         if result.mode == 1:
             if result.status == 0:

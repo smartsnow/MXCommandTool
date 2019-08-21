@@ -22,10 +22,12 @@ class Command():
     def encode(self):
         return cmdTable['wifi_link_info_get_cmd']
 
-    def decode(self, cmd, payload):
-        if cmd != eventTable['wifi_link_info_get_event']:
-            return None
+class Event():
 
+    code = eventTable['wifi_link_info_get_event']
+    name = 'Link Information'
+
+    def decode(self, payload):
         result = info.parse(payload)
         output = ('connected: %d\r\nssid: %s\r\nbssid: %s\r\nsecurity: %d\r\nchannel: %d\r\n\rssi: %d' % (result.is_connected, result.ssid.decode(), result.bssid.hex().upper() , result.security, result.channel, result.rssi))
         return output

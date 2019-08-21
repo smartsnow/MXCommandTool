@@ -10,7 +10,10 @@ class Command():
     def encode(self):
         return cmdTable['wifi_version_get_cmd']
 
-    def decode(self, cmd, payload):
-        if cmd != eventTable['wifi_version_get_event']:
-            return None
+class Event():
+
+    code = eventTable['wifi_version_get_event']
+    name = 'Driver Version'
+
+    def decode(self, payload):
         return payload[3:].decode()

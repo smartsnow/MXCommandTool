@@ -35,11 +35,12 @@ class Command():
         elif mode == 'Activate':
             return  cmdTable['wifi_scan_cmd'] + b'\x01' + b'\x01\x00\x00\x00' + b'\x02' + ssidlen.to_bytes(2, 'little') + ssidinput
 
+class Event():
 
-    def decode(self, cmd, payload):        
-        if cmd != eventTable['wifi_scan_event']:
-            return None
+    code = eventTable['wifi_scan_event']
+    name = 'Scan Result'
 
+    def decode(self, payload):        
         data_parse = data.parse(payload)
 
         index = data.sizeof()

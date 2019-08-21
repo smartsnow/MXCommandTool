@@ -39,7 +39,7 @@ class LogTableWidget(QTableWidget):
 
     def __init__(self):
         super().__init__()
-        headerLabels = ['Time', 'Command', 'Value']
+        headerLabels = ['Time', 'Direction', 'Name', 'Value']
         self.setColumnCount(len(headerLabels))
         self.setHorizontalHeaderLabels(headerLabels)
         self.verticalHeader().setVisible(False)
@@ -83,7 +83,7 @@ class MainWindow(QWidget):
         grpbox_logwin.setLayout(layout_logwin)
 
         self.logTable = LogTableWidget()
-        self.logTable.addRow([time.strftime("%T"), '', longDescription])
+        self.logTable.addRow([time.strftime("%T"), 'None', 'Information', longDescription])
         self.logTable.resizeColumnsToContents()
         layout_logwin.addWidget(self.logTable)
         layout_serial = QHBoxLayout()

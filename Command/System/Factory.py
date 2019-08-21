@@ -9,6 +9,3 @@ class Command():
 
     def encode(self):
         return cmdTable['system_factory_cmd']
-
-    def decode(self, cmd, payload):
-        return None

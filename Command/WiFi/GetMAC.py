@@ -11,7 +11,10 @@ class Command():
     def encode(self):
         return cmdTable['wifi_mac_get_cmd']
 
-    def decode(self, cmd, payload):
-        if cmd != eventTable['wifi_mac_get_event']:
-            return None
+class Event():
+    
+    code = eventTable['wifi_mac_get_event']
+    name = 'MAC Address'
+
+    def decode(self, payload):
         return payload[3:].hex().upper()

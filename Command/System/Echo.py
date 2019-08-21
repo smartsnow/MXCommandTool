@@ -14,7 +14,10 @@ class Command():
         command = cmdTable['ipc_echo_cmd'] + b'\x02' + length.to_bytes(2, 'little') + userinput
         return command
 
-    def decode(self, cmd, payload):
-        if cmd != eventTable['ipc_echo_event']:
-            return None
+class Event():
+
+    code = eventTable['ipc_echo_event']
+    name = 'Echo'
+
+    def decode(self, payload):
         return payload[3:].decode()
