@@ -10,6 +10,10 @@ from importlib import import_module
 from hci import Hci
 from argsJson import ArgsJson
 
+longDescription = '''Version\t: 1.0.0
+Author\t: Snow Yang
+Bug Reports\t: yangsw@mxchip.com'''
+
 class Worker(QThread):
     # Signals
     signalLogTableAddRow = pyqtSignal(list)
@@ -27,6 +31,7 @@ class Worker(QThread):
         self.mainWindow.buttonSendCommand.clicked.connect(self.sendCommand)
         self.mainWindow.buttonOpenCloseSerial.clicked.connect(self.openCloseSerial)
         self.mainWindow.buttonClearLogWindow.clicked.connect(self.clearLogWindow)
+        self.mainWindow.logTable.cellClicked.connect(self.logTableCellClicked)
         self.signalLogTableAddRow.connect(self.addLogListItem)
         self.signalSerialException.connect(self.SerialExceptionHandler)
         # Command Widgets
@@ -36,6 +41,8 @@ class Worker(QThread):
         self.refreshSerialList()
         self.argsJson = ArgsJson()
         self.walkScripts()
+        self.mainWindow.logTable.addRow([time.strftime("%T"), 'None', 'Information', longDescription])
+        self.rawData = ['']
 
     def walkScripts(self):
         for root, dirs, files in os.walk("Command", topdown=False):
@@ -63,9 +70,15 @@ class Worker(QThread):
             data = self.hci.read()
             code = data[:2]
             payload = data[2:]
+            self.rawData.append(data)
             if code in self.evtObjDict:
                 value = self.evtObjDict[code].decode(payload)
                 self.signalLogTableAddRow.emit([time.strftime("%T"), 'Receive', self.evtObjDict[code].name, value])
+            else:
+                self.signalLogTableAddRow.emit([time.strftime("%T"), 'Receive', 'Unknow', ''])
+
+    def logTableCellClicked(self, row, column):
+        self.mainWindow.logRaw.setText(' '.join([b.to_bytes(1, 'big').hex() for b in self.rawData[row]]))
 
     def onTreeClicked(self, index):
         info = self.mainWindow.model.fileInfo(index)
@@ -98,6 +111,7 @@ class Worker(QThread):
 
     def clearLogWindow(self):
         self.mainWindow.logTable.setRowCount(0)
+        self.rawData = []
 
     def refreshSerialList(self):
         portlist = self.hci.slip.portlist()
@@ -109,6 +123,7 @@ class Worker(QThread):
             return
         args = self.cmdObjDict[self.curCmdName].encode()
         self.hci.write(args)
+        self.rawData.append(args)
         self.signalLogTableAddRow.emit([time.strftime("%T"), 'Send', self.curCmdName, ''])
 
     def openCloseSerial(self):

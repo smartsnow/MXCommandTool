@@ -6,10 +6,6 @@ from PyQt5.QtWidgets import *
 from PyQt5 import QtCore, QtGui
 from worker import Worker
 
-longDescription = '''Version\t: 1.0.0
-Author\t: Snow Yang
-Bug Reports\t: yangsw@mxchip.com'''
-
 groupBoxStyleSheet = \
     '''
 QGroupBox::title 
@@ -17,7 +13,6 @@ QGroupBox::title
     subcontrol-position: top center; 
 }
 '''
-
 
 class UsrFileSystemModel(QFileSystemModel):
     def data(self, index, role):
@@ -81,11 +76,17 @@ class MainWindow(QWidget):
         # Log window
         layout_logwin = QVBoxLayout()
         grpbox_logwin.setLayout(layout_logwin)
+        split_logwin = QSplitter(QtCore.Qt.Vertical)
+        layout_logwin.addWidget(split_logwin)
 
         self.logTable = LogTableWidget()
-        self.logTable.addRow([time.strftime("%T"), 'None', 'Information', longDescription])
         self.logTable.resizeColumnsToContents()
-        layout_logwin.addWidget(self.logTable)
+        split_logwin.addWidget(self.logTable)
+        self.logRaw = QTextBrowser()
+        self.logRaw.setToolTip('Raw HCI payload of Command or Event in HEX format')
+        split_logwin.addWidget(self.logRaw)
+        split_logwin.setStretchFactor(0, 4)
+        split_logwin.setStretchFactor(1, 1)
         layout_serial = QHBoxLayout()
         layout_logwin.addLayout(layout_serial)
 
