@@ -51,6 +51,10 @@ class Worker(QThread):
 
         for root, dirs, files in os.walk("Event", topdown=False):
             for name in files:
+                if not name.endswith('.py'):
+                    continue
+                moduleName = os.path.splitext(os.path.join(root, name))[0].replace('/', '.').replace('\\', '.')
+                module = import_module(moduleName)
                 evtObj = module.Event()
                 self.evtObjDict[evtObj.code] = evtObj
 
