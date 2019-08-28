@@ -10,9 +10,9 @@ from importlib import import_module
 from hci import Hci
 from argsJson import ArgsJson
 
-longDescription = '''Version\t: 1.0.0
-Author\t: Snow Yang
-Bug Reports\t: yangsw@mxchip.com'''
+longDescription = '''Version : 1.0.0
+Author : Snow Yang
+Bug Reports : yangsw@mxchip.com'''
 
 class Worker(QThread):
     # Signals
