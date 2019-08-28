@@ -14,6 +14,7 @@ class MxArgsWidget(QWidget):
         self.formlayout.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
         self.vlayout.addWidget(QLabel('Description'))
         self.textBrowser = QTextBrowser()
+        self.textBrowser.setMinimumHeight(300)
         self.textBrowser.setText(description)
         self.vlayout.addWidget(self.textBrowser)
         self.argWidgetDict = {}
