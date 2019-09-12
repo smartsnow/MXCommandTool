@@ -26,6 +26,7 @@ cmdTable = {
 	'wifi_softap_start_cmd': b'\x19\x10',
 	'wifi_softap_stop_cmd': b'\x1a\x10',
 	'wifi_softap_state_get_cmd': b'\x1b\x10',
+	'socket_create_cmd': b'\x1c\x10',
 }
 eventTable = {
 	'ipc_echo_event': b'\x01\x20',
