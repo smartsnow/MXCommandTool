@@ -3,9 +3,14 @@ from cmdTable import cmdTable, eventTable
 from construct import *
 import socket
 
-response = Struct(
+response_header = Struct(
     'type' /Int8ub,
     'ret' /BytesInteger(4, signed=True, swapped=True)
+)
+
+response_data = Struct(
+    'type' /Int8ub,
+    'ip_int' /Bytes(4)
 )
 
 class Command():
@@ -32,10 +37,13 @@ class Event():
     name = 'Event.socket.gethostbyname'
 
     def decode(self, payload):
-        result = response.parse(payload)
-        if result.ret < 0:
+        if len(payload) == response_header.sizeof():
+            result = response_header.parse(payload)
             output = ('return: %d\r\n' % (result.ret))
+        elif len(payload) == (response_header.sizeof() + response_header.sizeof()):
+            result = response_data.parse(payload[response_header.sizeof():])
+            output = ('IP: %s\r\n' % (socket.inet_ntoa(result.ip_int)))
         else:
-            output = ('IP: %s\r\n' % (socket.inet_ntoa(result.ret.to_bytes(4, 'little'))))
+            output = ('ERROR: response format error!\r\n')
 
         return output

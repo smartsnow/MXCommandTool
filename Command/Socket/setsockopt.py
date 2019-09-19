@@ -30,7 +30,7 @@ optnameDict = {
     'SO_NO_CHECK': b'\x0a\x10\x00\x00'
 }
 
-response = Struct(
+response_header = Struct(
     'type' /Int8ub,
     'ret' /BytesInteger(4, signed=True, swapped=True)
 )
@@ -83,6 +83,10 @@ class Event():
     name = 'Event.socket.setsockopt'
 
     def decode(self, payload):
-        result = response.parse(payload)
-        output = ('return: %d\r\n' % (result.ret))
+        if len(payload) == response_header.sizeof():
+            result = response_header.parse(payload)
+            output = ('return: %d\r\n' % (result.ret))
+        else:
+            output = ('ERROR: response format error!\r\n')
+
         return output

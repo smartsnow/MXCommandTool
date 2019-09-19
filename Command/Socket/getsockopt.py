@@ -30,7 +30,12 @@ optnameDict = {
     'SO_NO_CHECK': b'\x0a\x10\x00\x00'
 }
 
-response = Struct(
+response_header = Struct(
+    'type' /Int8ub,
+    'ret' /BytesInteger(4, signed=True, swapped=True)
+)
+
+response_data = Struct(
     'type_sockfd' /Int8ub,
     'sockfd' /BytesInteger(4, signed=True, swapped=True),
     'type_level' /Int8ub,
@@ -84,9 +89,15 @@ class Event():
     name = 'Event.socket.getsockopt'
 
     def decode(self, payload):
-        result = response.parse(payload)
-        index = response.sizeof()
-        optval = payload[index:].hex()
-        output = ('sockfd: %d\r\nlevel: 0x%02x\r\noptname: 0x%02x\r\noptval: %s\r\n' % 
-                    (result.sockfd, result.level, result.optname, optval))
+        if len(payload) == response_header.sizeof():
+            result = response_header.parse(payload)
+            output = ('return: %d\r\n' % (result.ret))
+        elif len(payload) >= (response_header.sizeof() + response_data.sizeof()):
+            result = response_data.parse(payload[response_header.sizeof():])
+            optval = payload[(response_header.sizeof() + response_data.sizeof()):].hex()
+            output = ('sockfd: %d\r\nlevel: 0x%04x\r\noptname: 0x%04x\r\noptval: b\'%s\'\r\n' % 
+                        (result.sockfd, result.level, result.optname, optval))
+        else:
+            output = ('ERROR: response format error!\r\n')
+
         return output

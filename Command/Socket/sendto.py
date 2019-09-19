@@ -5,7 +5,7 @@ from construct import *
 flagDict = {'DEFAULT': b'\x00\x00\x00\x00'}
 sa_familyDict = {'AF_NET': b'\x02\x00\x00\x00', 'AF_NET6': b'\x0a\x00\x00\x00'}
 
-response = Struct(
+response_header = Struct(
     'type' /Int8ub,
     'ret' /BytesInteger(4, signed=True, swapped=True)
 )
@@ -68,6 +68,10 @@ class Event():
     name = 'Event.socket.sendto'
 
     def decode(self, payload):
-        result = response.parse(payload)
-        output = ('return: %d\r\n' % (result.ret))
+        if len(payload) == response_header.sizeof():
+            result = response_header.parse(payload)
+            output = ('return: %d\r\n' % (result.ret))
+        else:
+            output = ('ERROR: response format error!\r\n')
+
         return output

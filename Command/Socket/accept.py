@@ -3,12 +3,12 @@ from cmdTable import cmdTable, eventTable
 from construct import *
 import socket
 
-response_ret = Struct(
+response_header = Struct(
     'type_ret' /Int8ub,
     'ret' /BytesInteger(4, signed=True, swapped=True),
 )
 
-response = Struct(
+response_data = Struct(
     'type_sockfd' /Int8ub,
     'sockfd' /BytesInteger(4, signed=True, swapped=True),
     'type_addr' /Int8ub,
@@ -48,15 +48,20 @@ class Event():
     name = 'Event.socket.accept'
 
     def decode(self, payload):
-        if len(payload) == response_ret.sizeof():
-            result = response_ret.parse(payload)
+        if len(payload) == response_header.sizeof():
+            result = response_header.parse(payload)
             output = ('return: %d\r\n' % (result.ret))
-        else:
-            result = response.parse(payload)
-            index = response.sizeof()
-            # addr = payload[index:].hex()
+        elif len(payload) >= (response_header.sizeof() + response_data.sizeof()):
+            result = response_data.parse(payload[response_header.sizeof():])
+            index = response_header.sizeof() + response_data.sizeof()
             addr = sockaddr_in.parse(payload[index:])
-            output = ('sockfd: %d\r\naddr: sin_len=%d, sin_family=0x%02x, addr=%s, port=%d\r\n' % 
-                        (result.sockfd, addr.sin_len, addr.sin_family, 
-                        socket.inet_ntoa(addr.sin_addr.to_bytes(4, 'little')), addr.sin_port))
+            if addr:
+                output = ('sockfd: %d\r\naddr: sin_len=%d, sin_family=0x%04x, addr=%s, port=%d\r\n' % 
+                            (result.sockfd, addr.sin_len, addr.sin_family, 
+                            socket.inet_ntoa(addr.sin_addr.to_bytes(4, 'little')), addr.sin_port))
+            else:
+                output = ('ERROR: response (sockaddr) format error!\r\n')
+        else:
+            output = ('ERROR: response format error!\r\n')
+
         return output

@@ -6,7 +6,7 @@ domainDict = {'AF_INET': b'\x02\x00\x00\x00', 'AF_INET6': b'\x0a\x00\x00\x00'}
 typeDict = {'SOCK_STREAM': b'\x01\x00\x00\x00', 'SOCK_DGRAM': b'\x02\x00\x00\x00'}
 protocolDict = {'IPPROTO_TCP': b'\x06\x00\x00\x00', 'IPPROTO_UDP': b'\x11\x00\x00\x00'}
 
-response = Struct(
+response_header = Struct(
     'type' /Int8ub,
     'ret_fd' /BytesInteger(4, signed=True, swapped=True)
 )
@@ -48,6 +48,10 @@ class Event():
     name = 'Event.socket.create'
 
     def decode(self, payload):
-        result = response.parse(payload)
-        output = ('fd: %d\r\n' % (result.ret_fd))
+        if len(payload) == response_header.sizeof():
+            result = response_header.parse(payload)
+            output = ('fd: %d\r\n' % (result.ret_fd))
+        else:
+            output = ('ERROR: response format error!\r\n')
+
         return output

@@ -4,12 +4,12 @@ from construct import *
 
 flagDict = {'DEFAULT': b'\x00\x00\x00\x00'}
 
-response_ret = Struct(
+response_header = Struct(
     'type_ret' /Int8ub,
     'ret' /BytesInteger(4, signed=True, swapped=True),
 )
 
-response = Struct(
+response_data = Struct(
     'type_sockfd' /Int8ub,
     'sockfd' /BytesInteger(4, signed=True, swapped=True),
     'type_data' /Int8ub,
@@ -52,13 +52,16 @@ class Event():
     name = 'Event.socket.recv'
 
     def decode(self, payload):
-        if len(payload) == response_ret.sizeof():
-            result = response_ret.parse(payload)
+        if len(payload) == response_header.sizeof():
+            result = response_header.parse(payload)
             output = ('return: %d\r\n' % (result.ret))
-        else:
-            result = response.parse(payload)
-            index = response.sizeof()
+        elif len(payload) >= (response_header.sizeof() + response_header.sizeof()):
+            result = response_data.parse(payload[response_header.sizeof():])
+            index = response_header.sizeof() + response_data.sizeof()
             data = payload[index:].hex()
-            output = ('sockfd: %d\r\nlen: %d\r\ndata: %s\r\n' % 
+            output = ('sockfd: %d\r\nlen: %d\r\ndata: b\'%s\'\r\n' % 
                         (result.sockfd, result.len_data, data))
+        else:
+            output = ('ERROR: response format error!\r\n')
+
         return output
