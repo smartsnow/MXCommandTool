@@ -55,12 +55,17 @@ class Event():
         if len(payload) == response_header.sizeof():
             result = response_header.parse(payload)
             output = ('return: %d\r\n' % (result.ret))
-        elif len(payload) >= (response_header.sizeof() + response_header.sizeof()):
-            result = response_data.parse(payload[response_header.sizeof():])
-            index = response_header.sizeof() + response_data.sizeof()
-            data = payload[index:].hex()
-            output = ('sockfd: %d\r\nlen: %d\r\ndata: b\'%s\'\r\n' % 
-                        (result.sockfd, result.len_data, data))
+        elif len(payload) >= (response_header.sizeof() + response_data.sizeof()):
+            result = response_header.parse(payload)
+            output = ('return: %d\r\n' % (result.ret))
+            if result.ret <= 0:
+                return output
+            else:
+                data = response_data.parse(payload[response_header.sizeof():])
+                index = response_header.sizeof() + response_data.sizeof()
+                data_recv = payload[index:].hex()
+                output += ('sockfd: %d\r\nlen: %d\r\ndata: b\'%s\'\r\n' % 
+                            (data.sockfd, data.len_data, data_recv))
         else:
             output = ('ERROR: response format error!\r\n')
 

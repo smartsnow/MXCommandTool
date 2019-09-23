@@ -40,9 +40,14 @@ class Event():
         if len(payload) == response_header.sizeof():
             result = response_header.parse(payload)
             output = ('return: %d\r\n' % (result.ret))
-        elif len(payload) == (response_header.sizeof() + response_header.sizeof()):
-            result = response_data.parse(payload[response_header.sizeof():])
-            output = ('IP: %s\r\n' % (socket.inet_ntoa(result.ip_int)))
+        elif len(payload) == (response_header.sizeof() + response_data.sizeof()):
+            result = response_header.parse(payload)
+            output = ('return: %d\r\n' % (result.ret))
+            if result.ret < 0:
+                return output
+            else:
+                data = response_data.parse(payload[response_header.sizeof():])
+                output += ('IP: %s\r\n' % (socket.inet_ntoa(data.ip_int)))
         else:
             output = ('ERROR: response format error!\r\n')
 

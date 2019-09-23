@@ -40,7 +40,7 @@ cmdTable = {
 	'socket_close_cmd': b'\x27\x10',
 	'socket_shutdown_cmd': b'\x28\x10',
 	'socket_gethostbyname_cmd': b'\x29\x10',
-	'net_ping_cmd': b'\x2a\x10',
+	'socket_ping_cmd': b'\x2a\x10',
 }
 eventTable = {
 	'ipc_echo_event': b'\x01\x20',
@@ -73,5 +73,5 @@ eventTable = {
 	'socket_close_event': b'\x1c\x20',
 	'socket_shutdown_event': b'\x1d\x20',
 	'socket_gethostbyname_event': b'\x1e\x20',
-	'net_ping_event': b'\x1f\x20',
+	'socket_ping_event': b'\x1f\x20',
 }

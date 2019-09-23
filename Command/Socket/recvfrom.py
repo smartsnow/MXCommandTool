@@ -64,25 +64,30 @@ class Event():
         if len(payload) == response_header.sizeof():
             result = response_header.parse(payload)
             output = ('return: %d\r\n' % (result.ret))
-        elif len(payload) >= (response_header.sizeof() + response_header.sizeof()):
-            index = response_header.sizeof()
-            result = response_data.parse(payload[index:(index+response_data.sizeof())])
-            index += response_data.sizeof()
-            if len(payload) >= (response_header.sizeof() + response_header.sizeof() + result.len_data):
-                data = payload[index:(index+result.len_data)].hex()
-                index += result.len_data
-                if len(payload) == (response_header.sizeof() + response_data.sizeof() + result.len_data + 3 + sockaddr_in.sizeof()):
-                    addr = sockaddr_in.parse(payload[(index+3):])
-                    output = ('sockfd: %d\r\nlen: %d\r\ndata: b\'%s\'\r\naddr: sin_len=%d, sin_family=0x%04x, addr=%s, port=%d\r\n' % 
-                                (result.sockfd, 
-                                result.len_data, data, 
-                                addr.sin_len, addr.sin_family, 
-                                socket.inet_ntoa(addr.sin_addr.to_bytes(4, 'little')),
-                                addr.sin_port))
-                else:
-                    output = ('ERROR: response (sockaddr) format error!\r\n')
+        elif len(payload) >= (response_header.sizeof() + response_data.sizeof()):
+            result = response_header.parse(payload)
+            output = ('return: %d\r\n' % (result.ret))
+            if result.ret <= 0:
+                return output
             else:
-                output = ('ERROR: response (data len) format error!\r\n')
+                index = response_header.sizeof()
+                data = response_data.parse(payload[index:(index+response_data.sizeof())])
+                index += response_data.sizeof()
+                if len(payload) >= (response_header.sizeof() + response_header.sizeof() + data.len_data):
+                    data_recv = payload[index:(index+data.len_data)].hex()
+                    index += data.len_data
+                    if len(payload) == (response_header.sizeof() + response_data.sizeof() + data.len_data + 3 + sockaddr_in.sizeof()):
+                        addr = sockaddr_in.parse(payload[(index+3):])
+                        output += ('sockfd: %d\r\nlen: %d\r\ndata: b\'%s\'\r\naddr: sin_len=%d, sin_family=0x%04x, addr=%s, port=%d\r\n' % 
+                                    (data.sockfd, 
+                                    data.len_data, data_recv, 
+                                    addr.sin_len, addr.sin_family, 
+                                    socket.inet_ntoa(addr.sin_addr.to_bytes(4, 'little')),
+                                    addr.sin_port))
+                    else:
+                        output += ('ERROR: response (sockaddr) format error!\r\n')
+                else:
+                    output += ('ERROR: response (data len) format error!\r\n')
         else:
             output = ('ERROR: response format error!\r\n')
 

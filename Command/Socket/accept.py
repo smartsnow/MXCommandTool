@@ -5,12 +5,10 @@ import socket
 
 response_header = Struct(
     'type_ret' /Int8ub,
-    'ret' /BytesInteger(4, signed=True, swapped=True),
+    'ret_fd' /BytesInteger(4, signed=True, swapped=True),
 )
 
 response_data = Struct(
-    'type_sockfd' /Int8ub,
-    'sockfd' /BytesInteger(4, signed=True, swapped=True),
     'type_addr' /Int8ub,
     'len_addr' /BytesInteger(2, signed=False, swapped=True)
 )
@@ -50,17 +48,22 @@ class Event():
     def decode(self, payload):
         if len(payload) == response_header.sizeof():
             result = response_header.parse(payload)
-            output = ('return: %d\r\n' % (result.ret))
+            output = ('return: %d\r\n' % (result.ret_fd))
         elif len(payload) >= (response_header.sizeof() + response_data.sizeof()):
-            result = response_data.parse(payload[response_header.sizeof():])
-            index = response_header.sizeof() + response_data.sizeof()
-            addr = sockaddr_in.parse(payload[index:])
-            if addr:
-                output = ('sockfd: %d\r\naddr: sin_len=%d, sin_family=0x%04x, addr=%s, port=%d\r\n' % 
-                            (result.sockfd, addr.sin_len, addr.sin_family, 
-                            socket.inet_ntoa(addr.sin_addr.to_bytes(4, 'little')), addr.sin_port))
+            result = response_header.parse(payload)
+            output = ('return: %d\r\n' % (result.ret_fd))
+            if result.ret_fd <= 0:
+                return output
             else:
-                output = ('ERROR: response (sockaddr) format error!\r\n')
+                data = response_data.parse(payload[response_header.sizeof():])
+                index = (response_header.sizeof() + response_data.sizeof())
+                addr = sockaddr_in.parse(payload[index:])
+                if addr:
+                    output += ('sockfd: %d\r\naddr_len: %d, addr: sin_len=%d, sin_family=0x%04x, addr=%s, port=%d\r\n' % 
+                                (result.ret_fd, data.len_addr, addr.sin_len, addr.sin_family, 
+                                socket.inet_ntoa(addr.sin_addr.to_bytes(4, 'little')), addr.sin_port))
+                else:
+                    output += ('ERROR: response (sockaddr) format error!\r\n')
         else:
             output = ('ERROR: response format error!\r\n')
 

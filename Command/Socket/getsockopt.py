@@ -93,10 +93,15 @@ class Event():
             result = response_header.parse(payload)
             output = ('return: %d\r\n' % (result.ret))
         elif len(payload) >= (response_header.sizeof() + response_data.sizeof()):
-            result = response_data.parse(payload[response_header.sizeof():])
-            optval = payload[(response_header.sizeof() + response_data.sizeof()):].hex()
-            output = ('sockfd: %d\r\nlevel: 0x%04x\r\noptname: 0x%04x\r\noptval: b\'%s\'\r\n' % 
-                        (result.sockfd, result.level, result.optname, optval))
+            result = response_header.parse(payload)
+            output = ('return: %d\r\n' % (result.ret))
+            if result.ret < 0:
+                return output
+            else:
+                data = response_data.parse(payload[response_header.sizeof():])
+                optval = payload[(response_header.sizeof() + response_data.sizeof()):].hex()
+                output += ('sockfd: %d\r\nlevel: 0x%04x\r\noptname: 0x%04x\r\noptval: b\'%s\'\r\n' % 
+                            (data.sockfd, data.level, data.optname, optval))
         else:
             output = ('ERROR: response format error!\r\n')
 
