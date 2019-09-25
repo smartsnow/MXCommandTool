@@ -1,8 +1,9 @@
 from mxArgWidgets import *
 from cmdTable import cmdTable, eventTable
 from construct import *
+import socket
 
-sa_familyDict = {'AF_NET': b'\x02\x00\x00\x00', 'AF_NET6': b'\x0a\x00\x00\x00'}
+sa_familyDict = {'AF_NET': b'\x02', 'AF_NET6': b'\x0a'}
 
 response_header = Struct(
     'type' /Int8ub,
@@ -10,9 +11,11 @@ response_header = Struct(
 )
 
 bind_addr_attr = Struct(
-    'sa_family' /Bytes(4),
-    'ip' /Bytes(16),
-    'port' /BytesInteger(4, signed=True, swapped=True),
+    'sin_len' /Bytes(1),
+    'sin_family' /Bytes(1),
+    'sin_port' /Bytes(2),
+    'sin_addr' /Bytes(4),
+    'sin_zero' /Bytes(8),
 )
 
 class Command():
@@ -35,17 +38,18 @@ class Command():
         fd_input = int(sock_str, base=10).to_bytes(4, 'little')
         command += b'\x01' + fd_input
 
-        SA_family = self.widget.getArgWidget('SA_family').currentText()
-        sa_family_input = sa_familyDict[SA_family]
+        Sin_family = self.widget.getArgWidget('SA_family').currentText()
+        sin_family_input = sa_familyDict[Sin_family]
 
-        ip_input = self.widget.getArgWidget('ip_addr').text().encode()
-        ip_input += (16 - len(ip_input)) * b'\x00'
+        ip_str = self.widget.getArgWidget('ip_addr').text()
+        addr_input = socket.inet_aton(ip_str)
 
         port_str = self.widget.getArgWidget('port').text()
-        port_input = int(port_str, base=10)
+        port_input = int(port_str, base=10).to_bytes(2, 'big')
 
         bind_attr_len = bind_addr_attr.sizeof()
-        bind_addr_cmd = bind_addr_attr.build(dict( sa_family=sa_family_input, ip=ip_input, port=port_input ))
+        bind_addr_cmd = bind_addr_attr.build(dict( sin_len=bind_attr_len, 
+            sin_family=sin_family_input, sin_port=port_input, sin_addr=addr_input, sin_zero=0 ))
         command += b'\x02' + bind_attr_len.to_bytes(2, 'little') + bind_addr_cmd
 
         print(command)

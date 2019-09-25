@@ -20,7 +20,7 @@ response_data = Struct(
 sockaddr_in = Struct(
     'sin_len' /Int8ub,
     'sin_family' /Int8ub,
-    'sin_port' /BytesInteger(2, signed=False, swapped=True),
+    'sin_port' /BytesInteger(2, signed=False, swapped=False),
     'sin_addr' /BytesInteger(4, signed=True, swapped=True),
     'sin_zero' /Bytes(8)
 )
@@ -78,7 +78,7 @@ class Event():
                     index += data.len_data
                     if len(payload) == (response_header.sizeof() + response_data.sizeof() + data.len_data + 3 + sockaddr_in.sizeof()):
                         addr = sockaddr_in.parse(payload[(index+3):])
-                        output += ('sockfd: %d\r\nlen: %d\r\ndata: b\'%s\'\r\naddr: sin_len=%d, sin_family=0x%04x, addr=%s, port=%d\r\n' % 
+                        output += ('sockfd: %d\r\nlen: %d\r\ndata: b\'%s\'\r\naddr: sin_len=%d, sin_family=%d, addr=%s, port=%d\r\n' % 
                                     (data.sockfd, 
                                     data.len_data, data_recv, 
                                     addr.sin_len, addr.sin_family, 
