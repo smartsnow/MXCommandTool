@@ -45,7 +45,7 @@ source ~/.zshrc
 ## 安装依赖包
 
 ```
-$ pip3 install qdarkstyle==2.7 pyqt5==5.10.1 pyserial, construct
+$ pip3 install qdarkstyle==2.7 pyqt5==5.10.1 pyserial construct
 ```
 
 一样的，国内的 PyPi 太慢了，可以切换到国内镜像（清华大学和阿里云）
